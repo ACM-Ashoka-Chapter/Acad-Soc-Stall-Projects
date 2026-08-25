@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACM Decoder Challenge</title>
+<style>
+  :root{
+    --acm-blue:#0085CA;
+    --acm-blue-dark:#00639a;
+    --navy:#0a1929;
+    --navy-2:#102a43;
+    --panel:#14314f;
+    --text:#eaf4fb;
+    --muted:#9fc3dc;
+    --good:#2ecc71;
+    --bad:#e74c3c;
+    --gold:#ffd166;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 700px at 50% -10%, #17456b 0%, var(--navy) 60%, #060f1a 100%);
+    color:var(--text);
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    display:flex;flex-direction:column;align-items:center;
+    padding:18px 16px 40px;
+  }
+  .mono{font-family:"Consolas","SF Mono",Menlo,monospace}
+
+  /* ---------- header ---------- */
+  header{width:100%;max-width:980px;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .logo{
+    font-weight:800;font-size:26px;letter-spacing:2px;
+    background:var(--acm-blue);color:#fff;padding:6px 14px;border-radius:10px;
+    box-shadow:0 6px 18px rgba(0,133,202,.35);
+  }
+  .tagline{font-size:15px;color:var(--muted);flex:1}
+  .icon-btn{
+    background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--muted);
+    border-radius:8px;padding:7px 12px;font-size:14px;cursor:pointer;
+  }
+  .icon-btn:hover{border-color:var(--acm-blue);color:#fff}
+
+  /* ---------- cards ---------- */
+  .card{
+    width:100%;max-width:980px;background:rgba(16,42,67,.85);
+    border:1px solid rgba(255,255,255,.09);border-radius:16px;
+    padding:26px;box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  h1{margin:0 0 6px;font-size:32px}
+  h2{margin:0 0 16px;font-size:20px;color:var(--muted);font-weight:600}
+  .hidden{display:none !important}
+
+  /* ---------- home ---------- */
+  .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:22px 0 8px}
+  .mode-btn{
+    text-align:left;padding:20px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(135deg,var(--acm-blue),var(--acm-blue-dark));
+    border:none;color:#fff;transition:transform .12s ease,box-shadow .12s ease;
+  }
+  .mode-btn.alt{background:linear-gradient(135deg,#1b4f72,#123a56)}
+  .mode-btn:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,133,202,.35)}
+  .mode-btn .t{font-size:21px;font-weight:800;display:block}
+  .mode-btn .d{font-size:14px;opacity:.92;display:block;margin-top:6px}
+  .mode-btn .ex{font-size:13px;opacity:.8;margin-top:10px;display:block;font-family:"Consolas",monospace}
+  .howto{margin-top:18px;color:var(--muted);font-size:15px;line-height:1.6}
+
+  /* ---------- HUD ---------- */
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .stat{
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+    border-radius:10px;padding:8px 14px;font-size:15px;
+  }
+  .stat b{color:var(--gold);font-size:18px}
+  .stat.timer b{color:var(--acm-blue)}
+  .stat.timer.over b{color:var(--bad)}
+
+  /* ---------- prompt ---------- */
+  .prompt-label{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+  #prompt{
+    background:#081726;border:1px solid rgba(0,133,202,.4);border-radius:12px;
+    padding:22px;font-size:26px;line-height:1.7;word-break:break-word;
+    text-align:center;letter-spacing:1px;min-height:96px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #prompt.small{font-size:20px}
+  #prompt.english{font-size:38px;font-weight:800;letter-spacing:4px;color:var(--gold)}
+
+  #answer{
+    width:100%;margin-top:18px;padding:16px 18px;font-size:24px;
+    border-radius:12px;border:2px solid rgba(255,255,255,.15);
+    background:#08192b;color:#fff;outline:none;
+  }
+  #answer:focus{border-color:var(--acm-blue);box-shadow:0 0 0 4px rgba(0,133,202,.2)}
+  #answer.ok{border-color:var(--good)}
+  #answer.no{border-color:var(--bad);animation:shake .4s}
+  .hintline{margin-top:8px;font-size:14px;color:var(--muted);min-height:20px}
+
+  .back-btn{
+    background:transparent;border:1px solid rgba(255,255,255,.22);color:var(--muted);
+    border-radius:9px;padding:9px 16px;font-size:15px;font-weight:600;cursor:pointer;
+    margin-bottom:16px;
+  }
+  .back-btn:hover{border-color:var(--acm-blue);color:#fff;background:rgba(0,133,202,.12)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  button.act{
+    padding:13px 22px;font-size:16px;font-weight:700;border-radius:10px;cursor:pointer;
+    border:none;background:var(--acm-blue);color:#fff;
+  }
+  button.act:hover{background:#0b9ae6}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,.22);color:var(--muted)}
+  button.ghost:hover{border-color:var(--acm-blue);color:#fff}
+
+  #feedback{margin-top:18px;font-size:22px;font-weight:800;min-height:34px}
+  #feedback.ok{color:var(--good);animation:pop .45s}
+  #feedback.no{color:var(--bad)}
+  #feedback .rev{display:block;font-size:16px;font-weight:500;color:var(--muted);margin-top:6px}
+
+  /* ---------- reference ---------- */
+  #reference{margin-top:20px;border-top:1px solid rgba(255,255,255,.12);padding-top:18px}
+  .chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px;margin-bottom:20px}
+  .chart div{background:rgba(255,255,255,.05);border-radius:6px;padding:6px 9px;font-size:14px;font-family:"Consolas",monospace}
+  .chart div b{color:var(--gold);display:inline-block;width:18px}
+
+  /* ---------- animations ---------- */
+  @keyframes pop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  @keyframes flash{0%{background:#081726}35%{background:rgba(46,204,113,.28)}100%{background:#081726}}
+  #prompt.win{animation:flash .8s}
+  .confetti{position:fixed;width:11px;height:11px;top:-14px;pointer-events:none;z-index:99;border-radius:2px}
+  @keyframes fall{to{transform:translateY(105vh) rotate(760deg);opacity:0}}
+
+  @media (max-width:640px){
+    .modes{grid-template-columns:1fr}
+    #prompt{font-size:20px}
+    #prompt.english{font-size:28px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ACM</div>
+  <div class="tagline">Decoder Challenge &mdash; binary &amp; morse</div>
+  <button class="icon-btn" id="muteBtn" title="Toggle sound">&#128266; Sound: On</button>
+</header>
+
+<!-- ============ HOME ============ -->
+<section class="card" id="home">
+  <h1>Can you speak machine?</h1>
+  <h2>Pick a challenge. Type your answer. Beat the clock.</h2>
+
+  <div class="modes">
+    <button class="mode-btn" data-enc="binary" data-dir="decode">
+      <span class="t">Binary &rarr; English</span>
+      <span class="d">We give you 1s and 0s. You tell us the words.</span>
+      <span class="ex">01000001 01000011 01001101 &nbsp;&rarr;&nbsp; ACM</span>
+    </button>
+    <button class="mode-btn" data-enc="morse" data-dir="decode">
+      <span class="t">Morse &rarr; English</span>
+      <span class="d">Dots and dashes in, words out.</span>
+      <span class="ex">.- -.-. -- &nbsp;&rarr;&nbsp; ACM</span>
+    </button>
+  </div>
+
+  <p class="howto">
+    <b>How to play:</b> each round is a short CS word or phrase. Answer fast for a time bonus
+    (+50 max), keep a streak going for a multiplier. Stuck? Hit <b>Hint</b> to reveal a
+    character (&minus;25) or open the <b>Reference</b> chart. Wrong answers cost nothing &mdash;
+    just try again. The timer is only for bonus points, it never cuts you off.
+  </p>
+</section>
+
+<!-- ============ GAME ============ -->
+<section class="card hidden" id="game">
+  <button class="back-btn" id="backBtn">&larr; Back to menu</button>
+
+  <div class="hud">
+    <div class="stat">Mode <b id="hudMode">&mdash;</b></div>
+    <div class="stat">Score <b id="hudScore">0</b></div>
+    <div class="stat">Streak <b id="hudStreak">0</b></div>
+    <div class="stat">Solved <b id="hudSolved">0</b></div>
+    <div class="stat timer" id="hudTimerWrap">Time <b id="hudTimer">2:00</b></div>
+  </div>
+
+  <div class="prompt-label" id="promptLabel">Decode this</div>
+  <div id="prompt" class="mono">&nbsp;</div>
+
+  <input id="answer" class="mono" autocomplete="off" autocapitalize="off"
+         spellcheck="false" placeholder="Type your answer and press Enter">
+  <div class="hintline" id="hintline"></div>
+
+  <div class="controls">
+    <button class="act" id="submitBtn">Submit &crarr;</button>
+    <button class="act ghost" id="hintBtn">Hint (&minus;25)</button>
+    <button class="act ghost" id="skipBtn">Skip</button>
+    <button class="act ghost" id="refBtn">Reference</button>
+  </div>
+
+  <div id="feedback"></div>
+
+  <div id="reference" class="hidden">
+    <h2 style="margin-top:0">Morse code</h2>
+    <div class="chart" id="morseChart"></div>
+    <h2>ASCII &rarr; binary</h2>
+    <div class="chart" id="binChart"></div>
+  </div>
+</section>
+
+<script>
+/* =====================================================================
+   ==================  EDIT ME: THE WORD BANK  =========================
+   Uppercase A-Z, digits 0-9 and single spaces ONLY.
+   (Morse has no punctuation, so keep it clean and both modes stay valid.)
+   Add your own club in-jokes here before the event!
+   ===================================================================== */
+
+const WORDS = [
+  "ACM","BYTE","LOOP","CACHE","KERNEL","ARRAY","STACK","QUEUE","GRAPH","TREE",
+  "HEAP","NODE","PIXEL","LINUX","PYTHON","JAVA","LOGIC","DEBUG","COMPILE","SYNTAX",
+  "BINARY","HEX","BOOLEAN","POINTER","THREAD","SOCKET","ROUTER","SERVER","CLIENT","CLOUD",
+  "BUFFER","STRING","FLOAT","INTEGER","CLASS","OBJECT","METHOD","LAMBDA","REGEX","SCRIPT",
+  "CIPHER","HASH","TOKEN","DAEMON","BOOT","PATCH","MERGE","BRANCH","COMMIT","REPO"
+];
+
+const PHRASES = [
+  "HELLO WORLD","NULL POINTER","STACK OVERFLOW","BINARY SEARCH","LINKED LIST",
+  "OPEN SOURCE","MACHINE CODE","BIG O","HASH TABLE","DEEP LEARNING",
+  "SEGMENTATION FAULT","INFINITE LOOP","OFF BY ONE","RACE CONDITION","GARBAGE COLLECTOR",
+  "BUBBLE SORT","MERGE SORT","DEPTH FIRST","BREADTH FIRST","DYNAMIC PROGRAMMING",
+  "TURING MACHINE","NEURAL NET","BASE CASE","PURE FUNCTION","MEMORY LEAK",
+  "CODE REVIEW","PULL REQUEST","UNIT TEST","DARK MODE","RUBBER DUCK",
+  "ACM CHAPTER","COMPUTER SCIENCE","ALGORITHM","DATA STRUCTURE","CTRL ALT DEL"
+];
+
+/* Rounds are short on purpose. Morse is slower to read, so morse rounds
+   only ever draw from items at or under this many characters. */
+const MORSE_MAX_LEN = 14;
+const ROUND_SECONDS = 120;          // soft timer: bonus only, never blocks
+const HINT_COST = 25;
+const BASE_POINTS = 100;
+const MAX_TIME_BONUS = 50;
+
+/* =====================================================================
+   ==========================  CODECS  =================================
+   ===================================================================== */
+
+function toBinary(str){
+  return str.toUpperCase().split("")
+    .map(c => c.charCodeAt(0).toString(2).padStart(8,"0"))
+    .join(" ");
+}
+
+function fromBinary(bits){
+  return bits.trim().split(/\s+/)
+    .map(b => String.fromCharCode(parseInt(b,2)))
+    .join("");
+}
+
+const MORSE_TABLE = {
+  A:".-",    B:"-...",  C:"-.-.",  D:"-..",   E:".",     F:"..-.",
+  G:"--.",   H:"....",  I:"..",    J:".---",  K:"-.-",   L:".-..",
+  M:"--",    N:"-.",    O:"---",   P:".--.",  Q:"--.-",  R:".-.",
+  S:"...",   T:"-",     U:"..-",   V:"...-",  W:".--",   X:"-..-",
+  Y:"-.--",  Z:"--..",
+  0:"-----", 1:".----", 2:"..---", 3:"...--", 4:"....-",
+  5:".....", 6:"-....", 7:"--...", 8:"---..", 9:"----."
+};
+
+const MORSE_REVERSE = Object.fromEntries(
+  Object.entries(MORSE_TABLE).map(([k,v]) => [v,k])
+);
+
+function toMorse(str){
+  return str.toUpperCase().split(" ")
+    .map(word => word.split("").map(c => MORSE_TABLE[c] || "").join(" "))
+    .join(" / ");
+}
+
+function fromMorse(code){
+  return code.trim().split(/\s*\/\s*/)
+    .map(word => word.trim().split(/\s+/)
+      .map(sym => MORSE_REVERSE[sym] || "?").join(""))
+    .join(" ");
+}
+
+const encode = (text, enc) => enc === "binary" ? toBinary(text) : toMorse(text);
+
+/* =====================================================================
+   =====================  ANSWER CHECKING  =============================
+   Forgiving on purpose: this is a stall, not an exam.
+   ===================================================================== */
+
+function normalizeEnglish(s){
+  return s.toUpperCase()
+    .replace(/[^A-Z0-9 ]/g,"")   // drop stray punctuation
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function normalizeCode(s, enc){
+  if(enc === "binary"){
+    // keep only bits, then regroup into bytes so spacing never matters
+    const bits = s.replace(/[^01]/g,"");
+    return bits.match(/.{1,8}/g)?.join(" ") ?? "";
+  }
+  // morse: accept _ and - for dashes, * and . for dots, / | and \ as word breaks
+  return s.toUpperCase()
+    .replace(/[_–—]/g,"-")
+    .replace(/[*•]/g,".")
+    .replace(/[|\\]/g,"/")
+    .replace(/[^.\-/ ]/g,"")
+    .replace(/\s*\/\s*/g," / ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function isCorrect(input, answer, dir, enc){
+  return dir === "decode"
+    ? normalizeEnglish(input) === normalizeEnglish(answer)
+    : normalizeCode(input, enc) === normalizeCode(answer, enc);
+}
+
+/* =====================================================================
+   ==========================  SOUND  ==================================
+   Generated with Web Audio - no asset files, keeps this a single file.
+   ===================================================================== */
+
+let audioCtx = null, soundOn = true;
+
+function beep(freq, start, dur, type, vol){
+  const ctx = audioCtx;
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime + start);
+  gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + .01);
+  gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + start + dur);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(ctx.currentTime + start);
+  osc.stop(ctx.currentTime + start + dur + .02);
+}
+
+function playSound(kind){
+  if(!soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    if(kind === "ok"){
+      beep(660, 0,   .14, "sine", .22);
+      beep(880, .12, .18, "sine", .22);
+      beep(1320,.26, .28, "sine", .18);
+    }else{
+      beep(180, 0, .22, "square", .14);
+    }
+  }catch(e){ /* audio unavailable - game still works */ }
+}
+
+/* =====================================================================
+   ========================  GAME STATE  ===============================
+   ===================================================================== */
+
+const state = {
+  encoding:"binary", direction:"decode",
+  answer:"", promptText:"",
+  score:0, streak:0, solved:0,
+  hintsUsed:0, revealed:0,
+  startTime:0, timerId:null, awaitingNext:false
+};
+
+const $ = id => document.getElementById(id);
+const els = {
+  home:$("home"), game:$("game"), prompt:$("prompt"), promptLabel:$("promptLabel"),
+  answer:$("answer"), feedback:$("feedback"), hintline:$("hintline"),
+  score:$("hudScore"), streak:$("hudStreak"), solved:$("hudSolved"),
+  timer:$("hudTimer"), timerWrap:$("hudTimerWrap"), mode:$("hudMode"),
+  reference:$("reference"), submitBtn:$("submitBtn")
+};
+
+const MODE_NAMES = {
+  "binary-decode":"Binary → English",
+  "binary-encode":"English → Binary",
+  "morse-decode":"Morse → English",
+  "morse-encode":"English → Morse"
+};
+
+function pickItem(enc){
+  let pool = WORDS.concat(PHRASES);
+  if(enc === "morse") pool = pool.filter(x => x.length <= MORSE_MAX_LEN);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function startGame(enc, dir){
+  state.encoding = enc; state.direction = dir;
+  state.score = 0; state.streak = 0; state.solved = 0;   // fresh player, fresh score
+  els.mode.textContent = MODE_NAMES[enc + "-" + dir];
+  els.home.classList.add("hidden");
+  els.game.classList.remove("hidden");
+  els.reference.classList.add("hidden");
+  buildCharts();
+  newRound();
+}
+
+function newRound(){
+  const item = pickItem(state.encoding);
+  const coded = encode(item, state.encoding);
+
+  state.awaitingNext = false;
+  state.hintsUsed = 0;
+  state.revealed = 0;
+
+  if(state.direction === "decode"){
+    state.answer = item;
+    state.promptText = coded;
+    els.promptLabel.textContent = state.encoding === "binary"
+      ? "Decode this binary" : "Decode this morse";
+    els.prompt.className = "mono" + (coded.length > 90 ? " small" : "");
+    els.answer.placeholder = "Type the English words…";
+  }else{
+    state.answer = coded;
+    state.promptText = item;
+    els.promptLabel.textContent = state.encoding === "binary"
+      ? "Write this in binary (8-bit ASCII)" : "Write this in morse";
+    els.prompt.className = "mono english";
+    els.answer.placeholder = state.encoding === "binary"
+      ? "Type 8-bit bytes, e.g. 01000001 01000011"
+      : "Type dots and dashes, / between words";
+  }
+
+  els.prompt.textContent = state.promptText;
+  els.answer.value = "";
+  els.answer.className = "mono";
+  els.answer.disabled = false;
+  els.feedback.textContent = "";
+  els.feedback.className = "";
+  els.hintline.textContent = "";
+  els.submitBtn.innerHTML = "Submit ↵";
+  els.answer.focus();
+  startTimer();
+  updateHud();
+}
+
+/* ---------- soft timer: counts down for bonus, never blocks ---------- */
+function startTimer(){
+  clearInterval(state.timerId);
+  state.startTime = Date.now();
+  tick();
+  state.timerId = setInterval(tick, 250);
+}
+
+function elapsed(){ return (Date.now() - state.startTime) / 1000; }
+
+function tick(){
+  const left = ROUND_SECONDS - elapsed();
+  const over = left <= 0;
+  const abs = Math.abs(Math.floor(left));
+  const mm = Math.floor(abs / 60), ss = String(abs % 60).padStart(2,"0");
+  els.timer.textContent = (over ? "+" : "") + mm + ":" + ss;
+  els.timerWrap.classList.toggle("over", over);
+}
+
+function timeBonus(){
+  const left = Math.max(0, ROUND_SECONDS - elapsed());
+  return Math.round(MAX_TIME_BONUS * (left / ROUND_SECONDS));
+}
+
+function updateHud(){
+  els.score.textContent  = state.score;
+  els.streak.textContent = state.streak;
+  els.solved.textContent = state.solved;
+}
+
+/* ---------- submit ---------- */
+function submit(){
+  if(state.awaitingNext){ newRound(); return; }
+
+  const input = els.answer.value;
+  if(!input.trim()) return;
+
+  if(isCorrect(input, state.answer, state.direction, state.encoding)){
+    clearInterval(state.timerId);
+    state.solved++;
+    state.streak++;
+
+    const bonus = timeBonus();
+    const mult  = state.streak >= 3 ? 2 : 1;          // streak multiplier at 3+
+    const pts   = Math.max(10, (BASE_POINTS + bonus) * mult - state.hintsUsed * HINT_COST);
+    state.score += pts;
+
+    els.answer.className = "mono ok";
+    els.answer.disabled = true;
+    els.prompt.classList.add("win");
+    els.feedback.className = "ok";
+    els.feedback.innerHTML =
+      "✓ Correct! +" + pts + " points" +
+      (mult > 1 ? "  · 🔥 " + state.streak + " streak (x2)" : "") +
+      "<span class='rev'>" +
+        (state.direction === "decode"
+          ? state.promptText + "  =  " + state.answer
+          : state.promptText + "  =  " + state.answer) +
+      "</span>";
+    els.submitBtn.innerHTML = "Next round ↵";
+    state.awaitingNext = true;
+    playSound("ok");
+    confetti();
+    updateHud();
+    els.answer.blur();
+    els.submitBtn.focus();
+  }else{
+    state.streak = 0;
+    els.answer.className = "mono no";
+    els.feedback.className = "no";
+    els.feedback.textContent = "✗ Not quite — have another go.";
+    playSound("bad");
+    updateHud();
+    setTimeout(() => els.answer.classList.remove("no"), 450);
+  }
+}
+
+/* ---------- hint ---------- */
+function hint(){
+  if(state.awaitingNext) return;
+  if(state.revealed >= state.answer.length){
+    els.hintline.textContent = "That's the whole answer already!";
+    return;
+  }
+  state.hintsUsed++;
+  state.revealed = state.direction === "decode"
+    ? state.revealed + 1
+    : Math.min(state.answer.length, state.revealed + (state.encoding === "binary" ? 9 : 4));
+
+  const shown = state.answer.slice(0, state.revealed);
+  const rest  = state.answer.slice(state.revealed).replace(/[^ ]/g,"•");
+  els.hintline.innerHTML = "Hint (−" + (state.hintsUsed * HINT_COST) + " pts): <b class='mono'>"
+    + shown + "</b><span class='mono' style='opacity:.5'>" + rest + "</span>";
+}
+
+/* ---------- skip ---------- */
+function skip(){
+  clearInterval(state.timerId);
+  state.streak = 0;
+  els.feedback.className = "no";
+  els.feedback.innerHTML = "Skipped — the answer was:<span class='rev mono'>"
+    + state.answer + "</span>";
+  updateHud();
+  setTimeout(newRound, 1800);
+}
+
+/* ---------- confetti ---------- */
+function confetti(){
+  const colors = ["#0085CA","#ffd166","#2ecc71","#ffffff","#57c1ff"];
+  for(let i = 0; i < 40; i++){
+    const bit = document.createElement("div");
+    bit.className = "confetti";
+    bit.style.left = Math.random() * 100 + "vw";
+    bit.style.background = colors[i % colors.length];
+    bit.style.animation = "fall " + (1.6 + Math.random() * 1.4) + "s linear forwards";
+    bit.style.animationDelay = (Math.random() * .35) + "s";
+    document.body.appendChild(bit);
+    setTimeout(() => bit.remove(), 3600);
+  }
+}
+
+/* ---------- reference charts ---------- */
+let chartsBuilt = false;
+function buildCharts(){
+  if(chartsBuilt) return;
+  chartsBuilt = true;
+  const keys = Object.keys(MORSE_TABLE);
+  $("morseChart").innerHTML = keys
+    .map(k => "<div><b>" + k + "</b> " + MORSE_TABLE[k] + "</div>").join("");
+  $("binChart").innerHTML = keys
+    .map(k => "<div><b>" + k + "</b> " + k.charCodeAt(0).toString(2).padStart(8,"0") + "</div>")
+    .join("") + "<div><b>␣</b> 00100000</div>";
+}
+
+function goHome(){
+  clearInterval(state.timerId);
+  els.game.classList.add("hidden");
+  els.home.classList.remove("hidden");
+}
+
+/* =====================================================================
+   =========================  WIRING  ==================================
+   ===================================================================== */
+
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => startGame(btn.dataset.enc, btn.dataset.dir));
+});
+
+els.submitBtn.addEventListener("click", submit);
+$("hintBtn").addEventListener("click", hint);
+$("skipBtn").addEventListener("click", skip);
+$("backBtn").addEventListener("click", goHome);
+$("refBtn").addEventListener("click", () => els.reference.classList.toggle("hidden"));
+
+$("muteBtn").addEventListener("click", e => {
+  soundOn = !soundOn;
+  e.target.innerHTML = soundOn ? "🔊 Sound: On" : "🔇 Sound: Off";
+});
+
+els.answer.addEventListener("keydown", e => {
+  if(e.key === "Enter"){ e.preventDefault(); submit(); }
+});
+
+document.addEventListener("keydown", e => {
+  // Enter advances to the next round even when the input is disabled
+  if(e.key === "Enter" && state.awaitingNext && !els.game.classList.contains("hidden")){
+    e.preventDefault(); newRound();
+  }
+  if(e.key === "Escape" && !els.game.classList.contains("hidden")) goHome();
+});
+
+/* Expose the codecs for quick console sanity checks:
+   selfTest() should log "all good". */
+window.toBinary = toBinary; window.fromBinary = fromBinary;
+window.toMorse  = toMorse;  window.fromMorse  = fromMorse;
+window.selfTest = function(){
+  let bad = 0;
+  WORDS.concat(PHRASES).forEach(item => {
+    if(fromBinary(toBinary(item)) !== item){ console.error("binary fail:", item); bad++; }
+    if(fromMorse(toMorse(item))   !== item){ console.error("morse fail:",  item); bad++; }
+  });
+  console.log(bad ? bad + " failures" : "all good — " + (WORDS.length + PHRASES.length) + " items round-trip cleanly");
+  return bad === 0;
+};
+</script>
+</body>
+</html>

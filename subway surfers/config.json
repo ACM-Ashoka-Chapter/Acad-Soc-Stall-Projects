@@ -1,0 +1,41 @@
+{
+  "game_url": "https://poki.com/en/g/subway-surfers",
+  "camera_index": 0,
+  "frame_width": 640,
+  "frame_height": 480,
+  "mirror": true,
+  "keys": {
+    "left": "left",
+    "right": "right",
+    "jump": "up",
+    "roll": "down",
+    "hoverboard": "space"
+  },
+  "tuning": {
+    "lane_threshold": 0.42,
+    "lane_release": 0.21,
+    "jump_threshold": 0.05,
+    "roll_threshold": 0.18,
+    "action_cooldown_s": 0.28,
+    "lane_cooldown_s": 0.22,
+    "smoothing": 0.45,
+    "baseline_adapt": 0.02,
+    "min_visibility": 0.6,
+    "shift_weight": 1.0,
+    "tilt_weight": 1.6,
+    "tracking_grace_s": 0.45
+  },
+  "preview": {
+    "always_on_top": true,
+    "width": 400,
+    "x": 20,
+    "y": 20
+  },
+  "camera": {
+    "force_mjpg": true,
+    "target_fps": 30,
+    "manual_exposure": true,
+    "exposure": -6
+  },
+  "fresh_player_each_launch": true
+}

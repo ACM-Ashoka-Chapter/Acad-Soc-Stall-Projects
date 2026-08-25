@@ -1,0 +1,7 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Chrome profile used by the stall demo (local browsing data)
+browser-profile/
